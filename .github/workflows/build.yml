@@ -17,26 +17,24 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v4
 
-      - name: Download LinuxCNC HTML docs artifact
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          # A token that can read LinuxCNC/linuxcnc Actions artifacts. The
-          # default GITHUB_TOKEN is scoped to this repo only, so set a secret
-          # SOURCE_TOKEN: a classic PAT with the public_repo scope.
-          github_token: ${{ secrets.SOURCE_TOKEN || github.token }}
-          repo: LinuxCNC/linuxcnc
-          workflow: ci.yml
-          workflow_conclusion: success
-          branch: master
-          name: linuxcnc-doc.tar.gz
-          path: artifact
-
-      - name: Extract docs
+      - name: Download LinuxCNC HTML docs
+        # The linuxcnc-doc.tar.gz artifact is uploaded with archive:false, so it
+        # comes back as the raw tar.gz (not a zip); fetch it straight from the
+        # API. SOURCE_TOKEN is a classic PAT with the public_repo scope (the
+        # default GITHUB_TOKEN cannot read another repo's artifacts).
+        env:
+          TOKEN: ${{ secrets.SOURCE_TOKEN }}
         run: |
-          set -x
-          tarball=$(find artifact -name '*.tar.gz' | head -1)
-          test -n "$tarball"
-          tar -xzf "$tarball"   # produces ./html
+          set -eux
+          api=https://api.github.com/repos/LinuxCNC/linuxcnc
+          run_id=$(curl -fsSL -H "Authorization: Bearer $TOKEN" \
+            "$api/actions/workflows/ci.yml/runs?branch=master&status=success&per_page=1" \
+            | python3 -c 'import sys,json;print(json.load(sys.stdin)["workflow_runs"][0]["id"])')
+          url=$(curl -fsSL -H "Authorization: Bearer $TOKEN" \
+            "$api/actions/runs/$run_id/artifacts" \
+            | python3 -c 'import sys,json;a=[x for x in json.load(sys.stdin)["artifacts"] if x["name"]=="linuxcnc-doc.tar.gz"];print(a[0]["archive_download_url"])')
+          curl -fsSL -H "Authorization: Bearer $TOKEN" -o docs.tar.gz "$url"
+          tar -xzf docs.tar.gz   # produces ./html
           test -d html
 
       - name: Add search
