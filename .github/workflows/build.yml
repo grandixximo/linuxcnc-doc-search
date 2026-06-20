@@ -21,8 +21,8 @@ jobs:
         uses: dawidd6/action-download-artifact@v6
         with:
           # A token that can read LinuxCNC/linuxcnc Actions artifacts. The
-          # default GITHUB_TOKEN is scoped to this repo only, so set a
-          # fine-grained PAT secret SOURCE_TOKEN (public repo, Actions: Read).
+          # default GITHUB_TOKEN is scoped to this repo only, so set a secret
+          # SOURCE_TOKEN: a classic PAT with the public_repo scope.
           github_token: ${{ secrets.SOURCE_TOKEN || github.token }}
           repo: LinuxCNC/linuxcnc
           workflow: ci.yml

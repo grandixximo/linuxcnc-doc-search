@@ -6,7 +6,7 @@ source tree**.
 
 The LinuxCNC build stays minimalist and pulls in nothing extra: it just leaves
 a generic extension point in the docs topbar. This project takes the docs that
-LinuxCNC CI already produces, builds a [pagefind](https://pagefind.app) search
+LinuxCNC CI already produces, builds a pagefind search
 index, plugs the search box into that extension point, and emits the result as
 a downloadable artifact. Nothing here runs during the LinuxCNC build.
 
@@ -34,9 +34,10 @@ unchanged and fully usable.
 ## Running it
 
 In CI: `.github/workflows/build.yml` runs weekly and on demand. It needs a
-secret **`SOURCE_TOKEN`** to read LinuxCNC's Actions artifacts (a fine-grained
-PAT, public repo, Actions: Read). The repo's default `GITHUB_TOKEN` cannot read
-another repository's artifacts.
+secret **`SOURCE_TOKEN`** to read LinuxCNC's Actions artifacts: a classic
+personal access token with the `public_repo` scope. The repo's default
+`GITHUB_TOKEN` cannot read another repository's artifacts, and a fine-grained
+PAT cannot grant Actions read on a repo you do not own.
 
 Locally, against an extracted `html/` tree:
 
