@@ -1,0 +1,45 @@
+name: Build searchable docs
+
+# Pulls the HTML docs that LinuxCNC CI already publishes, adds pagefind search,
+# and uploads the result as an artifact. Runs weekly and on demand.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 1"   # Mondays 04:00 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Download LinuxCNC HTML docs artifact
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          # A token that can read LinuxCNC/linuxcnc Actions artifacts. The
+          # default GITHUB_TOKEN is scoped to this repo only, so set a
+          # fine-grained PAT secret SOURCE_TOKEN (public repo, Actions: Read).
+          github_token: ${{ secrets.SOURCE_TOKEN || github.token }}
+          repo: LinuxCNC/linuxcnc
+          workflow: ci.yml
+          workflow_conclusion: success
+          branch: master
+          name: linuxcnc-doc
+          path: artifact
+
+      - name: Extract docs
+        run: tar -xzf artifact/linuxcnc-doc.tar.gz   # produces ./html
+
+      - name: Add search
+        run: ./scripts/build.sh html
+
+      - name: Upload searchable docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: linuxcnc-doc-search
+          path: html
+          if-no-files-found: error

@@ -1,0 +1,185 @@
+/* Search styling injected into the LinuxCNC HTML docs by this project.
+   Loaded after the docs' own lcnc-overrides.css so the #lcnc-topbar id rules
+   here win.  The topbar, language switcher and base theme already live in the
+   docs; this only adds the search box, its results drawer, and a small
+   dark-theme canvas fix so the translucent bar renders consistently. */
+
+/* Declare both schemes and pin the root background per theme so the canvas
+   behind the translucent topbar is deterministic (no auto-dark flash). */
+:root { color-scheme: light dark; }
+html { background: #fff; }
+@media (prefers-color-scheme: dark) {
+  html { background: #1e1e1e; }
+}
+
+/* Search box in the topbar. */
+.lcnc-topbar-search {
+  margin-left: auto;
+  margin-right: 0.75rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  font-family: "Open Sans","DejaVu Sans",sans-serif;
+  /* The bar is always dark, so the box sits on dark in both themes.  Size via
+     pagefind's scale, not an input height override (that desyncs the
+     absolutely-positioned magnifier/clear). */
+  --pagefind-ui-scale: 0.6;
+  --pagefind-ui-background: transparent;
+  --pagefind-ui-text: #fff;          /* input text + magnifier on the dark bar */
+  --pagefind-ui-primary: #fff;
+  --pagefind-ui-border: hsla(0,0%,100%,.35);
+  --pagefind-ui-tag: hsla(0,0%,100%,.15);
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 4px;
+  --pagefind-ui-font: "Open Sans","DejaVu Sans",sans-serif;
+  --lcnc-x-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 5 L15 15 M15 5 L5 15' stroke='white' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
+  --lcnc-search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Ccircle cx='10' cy='10' r='7'/%3E%3Cline x1='15' y1='15' x2='20.5' y2='20.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+/* Search + language switcher form one right-aligned cluster; zero the
+   switcher's own margin-left:auto so it does not split the free space. */
+.lcnc-topbar-search + .lcnc-lang-switcher { margin-left: 0; }
+.lcnc-topbar-search #lcnc-search { width: 13rem; }
+/* #lcnc-topbar (id) outranks pagefind-ui.css (injected after this sheet).
+   The input is a faint white inset on the dark bar. */
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__search-input {
+  background: hsla(0,0%,100%,.1);
+  color: #d8d8d8; /* typed text: a smudge off pure white, both themes */
+  border-color: hsla(0,0%,100%,.35);
+}
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__search-input:focus {
+  background: hsla(0,0%,100%,.16);
+  border-color: hsla(0,0%,100%,.55);
+  /* replace the OS-accent (blue) focus ring with a neutral white halo */
+  outline: none;
+  box-shadow: 0 0 0 2px hsla(0,0%,100%,.18);
+}
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__search-input::placeholder { color: hsla(0,0%,100%,.7); }
+/* neutral selection tint (avoid the OS-accent blue) */
+.lcnc-topbar-search ::selection { background: hsla(0,0%,100%,.25); color: #fff; }
+/* Pagefind's clear control is a "Clear" text button; hide the word and draw a
+   small white x (background-image SVG, font-independent). */
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__search-clear {
+  font-size: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+}
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__search-clear::after {
+  content: "";
+  display: block;
+  width: 13px;
+  height: 13px;
+  opacity: 0.7;
+  background-image: var(--lcnc-x-icon);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__search-clear:hover::after { opacity: 1; }
+/* Pagefind masks the magnifier with -webkit-mask, which Firefox/Zen render
+   blank.  Use a plain background-image SVG instead (works in every engine);
+   pagefind's ::before size/position are kept. */
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__form::before {
+  background-color: transparent;
+  -webkit-mask: none;
+  mask: none;
+  background-image: var(--lcnc-search-icon);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.9;
+}
+/* Results drawer floats below the input.  It is themed to match the page
+   (light/dark), unlike the always-dark bar; redefining --pagefind-ui-text on
+   the drawer recolours all result text in one shot. */
+.lcnc-topbar-search .pagefind-ui__drawer {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 30rem;
+  max-height: 75vh;
+  overflow-y: auto;
+  border-radius: 0 0 6px 6px;
+  padding: 0.5em 0.85em 0.85em;
+  z-index: 1200;
+  --pagefind-ui-text: #222;
+  background: #fff;
+  color: #222;
+  border: 1px solid #d4d4d4;
+  border-top: none;
+  box-shadow: 0 6px 16px rgba(0,0,0,.18);
+}
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__result-link,
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__result-link:link { color: #2156a5; }
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__result-link:visited { color: #1d4b8f; }
+.lcnc-topbar-search .pagefind-ui__result-excerpt { color: #555; }
+.lcnc-topbar-search .pagefind-ui__message { color: #555; }
+/* Landing pages style bare p/ul/li generically and that leaks into the drawer;
+   re-assert result metrics at id specificity so it looks the same everywhere. */
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__result-title {
+  font-size: 1rem;
+  line-height: 1.25;
+}
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__result-excerpt,
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__message {
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__drawer ul {
+  font-family: inherit;
+  margin: 0;
+  padding: 0;
+}
+#lcnc-topbar .lcnc-topbar-search .pagefind-ui__drawer li {
+  line-height: normal;
+  margin-top: 0;
+}
+/* soften pagefind's hard-yellow match highlight to a translucent wash */
+.lcnc-topbar-search .pagefind-ui__result mark,
+.lcnc-topbar-search mark {
+  background: hsla(48,100%,50%,.30);
+  color: inherit;
+  padding: 0 1px;
+  border-radius: 2px;
+}
+@media (prefers-color-scheme: dark) {
+  /* Pin the pocket to solid fill + border.  A translucent pocket on the
+     translucent bar cold-paints inconsistently dark in Firefox/Zen; solid
+     values matching the settled look keep it backdrop-independent.  The bar
+     itself stays translucent. */
+  #lcnc-topbar .lcnc-topbar-search .pagefind-ui__search-input {
+    background: #1f1f1f;
+    border-color: #5d5d5d;
+  }
+  #lcnc-topbar .lcnc-topbar-search .pagefind-ui__search-input:focus {
+    background: #2e2e2e;
+    border-color: #8a8a8a;
+  }
+  .lcnc-topbar-search .pagefind-ui__drawer {
+    --pagefind-ui-text: #e0e0e0;
+    background: #1e1e1e;
+    color: #e0e0e0;
+    border-color: #444;
+    box-shadow: 0 6px 16px rgba(0,0,0,.5);
+  }
+  #lcnc-topbar .lcnc-topbar-search .pagefind-ui__result-link,
+  #lcnc-topbar .lcnc-topbar-search .pagefind-ui__result-link:link { color: #6fa8dc; }
+  #lcnc-topbar .lcnc-topbar-search .pagefind-ui__result-link:visited { color: #b48ead; }
+  .lcnc-topbar-search .pagefind-ui__result-excerpt { color: #aaa; }
+  .lcnc-topbar-search .pagefind-ui__message { color: #aaa; }
+  .lcnc-topbar-search .pagefind-ui__result mark,
+  .lcnc-topbar-search mark {
+    background: hsla(48,90%,55%,.25);
+    color: inherit;
+  }
+}
+/* The nav links are absolutely centred and ignore the right-hand cluster's
+   width, so hide them earlier when a search box is present. */
+@media (max-width: 1300px) {
+  .lcnc-topbar:has(.lcnc-topbar-search) .lcnc-topbar-links { display: none; }
+}
+@media (max-width: 1100px) { .lcnc-topbar-search #lcnc-search { width: 10rem; } }
+@media (max-width: 700px) {
+  .lcnc-topbar-search .pagefind-ui__drawer { width: 88vw; }
+}

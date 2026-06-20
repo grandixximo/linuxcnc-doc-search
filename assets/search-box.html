@@ -1,0 +1,44 @@
+<div class="lcnc-topbar-search">
+  <div id="lcnc-search"></div>
+  <script>
+    window.addEventListener("DOMContentLoaded", function () {
+      // One pagefind index is built per language subtree (en/_pagefind,
+      // de/_pagefind, ...) so results stay in a single language.  Load the
+      // index for THIS page's language, picked from <html lang>: the UI assets
+      // and the index live in <lang>/_pagefind/ off the html root.  __LCNC_REL__
+      // is the relative path from this page to the html root (filled per page
+      // by the injector).
+      var rel = "__LCNC_REL__";
+      var pageLang = document.documentElement.lang || "en";
+      var pfBase = rel + pageLang + "/_pagefind/";
+
+      // Result URLs are stored root-relative with the language dir included
+      // ("/en/man/..."), so rewrite them against rel to be relative to the
+      // current page; that keeps links working under any deployment prefix.
+      var relurl = function (u) { return rel + u.replace(/^\//, ""); };
+
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = pfBase + "pagefind-ui.css";
+      document.head.appendChild(link);
+
+      var script = document.createElement("script");
+      script.src = pfBase + "pagefind-ui.js";
+      script.onload = function () {
+        new PagefindUI({
+          element: "#lcnc-search",
+          showImages: false,
+          showSubResults: true,
+          processResult: function (result) {
+            result.url = relurl(result.url);
+            if (result.sub_results) {
+              result.sub_results.forEach(function (s) { s.url = relurl(s.url); });
+            }
+            return result;
+          }
+        });
+      };
+      document.body.appendChild(script);
+    });
+  </script>
+</div>
