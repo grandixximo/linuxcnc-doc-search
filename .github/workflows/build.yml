@@ -28,11 +28,16 @@ jobs:
           workflow: ci.yml
           workflow_conclusion: success
           branch: master
-          name: linuxcnc-doc
+          name: linuxcnc-doc.tar.gz
           path: artifact
 
       - name: Extract docs
-        run: tar -xzf artifact/linuxcnc-doc.tar.gz   # produces ./html
+        run: |
+          set -x
+          tarball=$(find artifact -name '*.tar.gz' | head -1)
+          test -n "$tarball"
+          tar -xzf "$tarball"   # produces ./html
+          test -d html
 
       - name: Add search
         run: ./scripts/build.sh html
