@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout this repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Download LinuxCNC HTML docs
         # The linuxcnc-doc.tar.gz artifact is uploaded with archive:false, so it
@@ -41,7 +41,7 @@ jobs:
         run: ./scripts/build.sh html
 
       - name: Upload searchable docs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linuxcnc-doc-search
           path: html
